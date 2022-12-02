@@ -22,3 +22,14 @@ For this build:
 - Find a number p' such that hash(pp') contains leading 4 zeroes, where p is the previous proof
 - p is the previous proof
 - p' is the new proof
+
+### BLockchain API
+There will be 3 methods:
+1. /transactions/new to create a new transaction to a block
+2. /mine to tell our server to mine a new block
+3. /chain to return the full Blockchain
+Example request for a transaction:
+![ExampleTransaction](./assets/transactionExample.png)
+
+### Consensus
+

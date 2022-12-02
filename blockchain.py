@@ -2,20 +2,20 @@ import hashlib
 import json
 from textwrap import dedent
 from time import time
-from uuid import uuid64
-from flask import Flask
+from uuid import uuid4
+from flask import Flask, jsonify, request
 
 class Blockchain(object):
     def __init__(self):
         self.chain = []
         self.currentTransactions = []
-    
-    # create the genesis block
-    self.NewBlock(previousHash=1, proof=100)
+        
+        # create the genesis block
+        self.NewBlock(proof=100, previousHash=1)
     
     def NewBlock(self, proof, previousHash=None):
         """
-        Creates a new block and ads it to the chain
+        Creates a new block and adds it to the chain
         :param proof: <int> The proof given by Proof of Work algorithm
         :param previousHash: (Optional) <str> Hash of previous block
         :return: <dict> New Block
@@ -29,6 +29,7 @@ class Blockchain(object):
             'previousHash': previousHash or self.Hash(self.chain[-1])
         }
 
+        # by this point, block PoW has been done, so the block is validated and secured
         # reset the current list of transactions
         self.currentTransactions = []
 
@@ -51,7 +52,7 @@ class Blockchain(object):
             'amount': amount,
         })
 
-        return self.last_block['index'] + 1
+        return self.LastBlock['index'] + 1
     
     def ProofOfWork(self, lastProof):
         """
@@ -93,11 +94,80 @@ class Blockchain(object):
         """
         # dictionary must be ordered or will have inconsistent hashes
         blockString = json.dumps(block, sort_keys=True).encode() # encoded string
-        return hashlib.sha256(block_string).hexdigest() # encoded with sha256
+        return hashlib.sha256(blockString).hexdigest() # encoded with sha256
 
     @property
     def LastBlock(self):
         # returns the last block in the chain
         return self.chain[-1]
+    
+# Instantiate our Node
+app = Flask(__name__)
+
+# Generate globally unique address for this node
+nodeIdentifier = str(uuid4()).replace('-', '')
+
+# Instantiate the Blockchain
+blockchain = Blockchain()
+
+@app.route('/mine', methods=['GET'])
+def Mine():
+    """
+    Calculates PoW
+    Rewards the miner by adding a transaction granting 1 coin
+    Forge the new Block by adding it to the chain
+    """
+    
+    # Run PoW algorithm to get next proof
+    lastBlock = blockchain.LastBlock
+    lastProof = lastBlock['proof']
+    proof = blockchain.ProofOfWork(lastProof)
+
+    # Receive reward for finding the proof
+    # Sender is "0" to signify that this node has mined a new coin
+    blockchain.NewTransaction(
+        sender="0",
+        recipient=nodeIdentifier,
+        amount = 1,
+    )
+
+    # Forge the new Block by adding it to the chain
+    previousHash = blockchain.Hash(lastBlock)
+    block = blockchain.NewBlock(proof, previousHash)
+
+    response = {
+        'message': "New Block Forged",
+        'index': block['index'],
+        'transactions': block['transactions'],
+        'proof': block['proof'],
+        'previous hash': block['previousHash'],
+    }
+    return jsonify(response), 200
 
 
+@app.route('/transactions/new', methods=['POST'])
+def NewTransaction():
+    values = request.get_json()
+
+    # Check that the required fields are in POST'ed data
+    required = ['sender', 'recipient', 'amount']
+    if not all(r in values for r in required):
+        return 'Missing Values', 400
+    
+    # Create a new transaction
+    index = blockchain.NewTransaction(values['sender'], 
+        values['recipient'], values['amount'])
+    
+    response = {'message': f"Transaction will be added to Block {index}"}
+    return jsonify(response), 201
+
+@app.route('/chain', methods=['GET'])
+def FullChain():
+    response = {
+        'chain': blockchain.chain,
+        'length': len(blockchain.chain),
+    }
+    return jsonify(response), 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
