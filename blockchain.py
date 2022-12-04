@@ -4,11 +4,13 @@ from textwrap import dedent
 from time import time
 from uuid import uuid4
 from flask import Flask, jsonify, request
+from urllib.parse import urlparse
 
 class Blockchain(object):
     def __init__(self):
         self.chain = []
         self.currentTransactions = []
+        self.nodes = set()
         
         # create the genesis block
         self.NewBlock(proof=100, previousHash=1)
@@ -71,6 +73,24 @@ class Blockchain(object):
         
         return proof
     
+    def RegisterNode(self, address):
+        """
+        Add a new node to the list of nodes
+        :param address: <str> Address of node, e.g., 'http://192.168.0.5:5000'
+        :return: None
+        """    
+
+        parsedUrl = urlparse(address)
+        self.nodes.add(parsedUrl.netloc)
+    
+    def ValidChain(self, chain):
+        """
+        Determine if a given blockchain is valid
+        :param chain: <list> a blockchain
+        :return: <bool> True if valid, otherwise False
+        """
+        pass        
+    
     @staticmethod
     def ValidProof(lastProof, proof):
         """
@@ -93,7 +113,7 @@ class Blockchain(object):
         :return: <str>
         """
         # dictionary must be ordered or will have inconsistent hashes
-        blockString = json.dumps(block, sort_keys=True).encode() # encoded string
+        blockString = json.dumps(block, sort_keys=True).encode() # encoded string in UTF-8
         return hashlib.sha256(blockString).hexdigest() # encoded with sha256
 
     @property
