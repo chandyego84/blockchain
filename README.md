@@ -24,6 +24,15 @@ For this build:
 - p' is the new proof
 To mimic the consensus validation more closely, we can adjust the difficulty of mining a block by adjusting the target value. More leading zeroes increases the mining difficulty while havingless decreases it. A higher difficulty means more hashing is required for a valid proof of work. See chainwork calculation explained later. This [answer](https://www.quora.com/Why-is-difficulty-measured-in-hash-s-leading-zeroes) gives a good explanation for why leading zeroes is used.
 
+### More Details on SHA256 Encryption
+SHA256 returns a 256-bit number in hexadecimal form. Moreover, it will return a string of 64 characters, each of which is a hexadecimal digit (0-9 and a-f). This is a convenient way to represent the hash, as it can be easily stored and transmitted as a string of characters rather than a raw binary value.  
+
+Why 64 characters?  
+Each character in a hexadecimal representation represents 4 bits of information. Since SHA-256 produces a hash with 256 bits of information, it requires 64 hexadecimal digits to represent the full hash value.
+
+Why does each character represent 4 bits of information?  
+Each character in a hexadecimal representation represents 4 bits of information because there are 16 possible values for each digit (0-9 and a-f), and 16 is equal to 2 to the power of 4 (16 = 2^4). Since each hexadecimal digit can represent 4 bits, it takes two digits to represent 8 bits (a byte), and 64 digits to represent the full 256-bit output of the SHA-256 hash function.
+
 ### Blockchain API
 There will be 3 methods:
 1. /transactions/new to create a new transaction to a block
@@ -46,8 +55,11 @@ For the worst-case scenario, say there a maximum of 50 values (1-50) and the tar
 My proof of work algorithm which uses sha256 encryption requires two leading zeroes as its target. How many hashes, on average, would it take to find a value below this target? Explain.  
 
 The number of leading zeroes required by your proof of work algorithm determines the difficulty of the algorithm. The more leading zeroes required, the more difficult the algorithm is to solve.
+
 To determine the average number of hashes that would be needed to find a value below your target of two leading zeroes, we need to first calculate the probability that a given hash will have two leading zeroes. The probability of any given hash having two leading zeroes is very low, since there are a very large number of possible hashes that can be generated using sha256 encryption.
+
 To calculate the probability, we need to consider the total number of possible hashes that can be generated using sha256 encryption, which is approximately 2^256. The number of hashes that have two leading zeroes is much smaller, since there are only 16 possible values that can have two leading zeroes (00, 01, 02, 03, etc.). Therefore, the probability that a given hash will have two leading zeroes is 16/2^256.
+
 Using this probability, we can calculate the expected value for the number of hashes that would be needed to find a value below the target of two leading zeroes. The expected value is the average number of hashes that would be needed, assuming that the probability of finding a value below the target on each trial is constant.
 In this case, the probability of finding a value below the target on each trial is 16/2^256. Therefore, the expected value is 1/ (16/2^256) = 2^256 / 16 = approximately 1.8 x 10^77 hashes.
 This means that, on average, you would expect to need to generate approximately 1.8 x 10^77 hashes using your proof of work algorithm before you find a value below the target of two leading zeroes. Of course, the actual number of hashes needed may vary from this expected value, and there is always a chance that you could find a value below the target on your very first hash.  

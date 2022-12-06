@@ -1,36 +1,73 @@
 from hashlib import sha256
+import random
+import numpy as np
 
-# PoW: how new blocks are created or mined on the blockchain. 
-    # Goal: Discover a number which solves a problem. 
-    # Number must be hard to find, easy to verify
-    # Example:
-    # hash (x * y) must end in 0. Fix x = 5, find y.
-
-x = 5   # base (previous hash)
-y = 0   # don't know what y should be yet (nonce)
-while sha256(f'{x*y}'.encode()).hexdigest()[-1] != "0": # keep hashing
-    y += 1
-
-# solution is y = 21, since the produced hash ends in 0
-print(f"The solution is y = {y}.")
-# sha256() 
-# :param: byte string
-# :return: hash object that can be digested into hex format using hexdigest()
-print(f"Value of hash(x*y): {sha256(f'{x*y}'.encode()).hexdigest()}")
-print("------------------------------------------")
-# expected value: 1/probability of being below target
 print("Mining difficulty doubles with each leading zero required. 2^256 possible values.")
-numHashes1 = 2**256 / (2**225 + 1)
-numHashes2 = 2**256 / (2**224 + 1)
-numHashes3 = 2**256 / (16)
-print(f"Target with one leading zeroes: {numHashes1}")
-print(f"Target with two leading zeroes: {numHashes2}")
-print(f"Two leading zeroes using 2^256/16 since only 16 possibe values with two leading zeroes: {numHashes3}")
+ # (1 / probability) gives expected avg. of hashes for each proof
+numHashes1 = 1 / ((2**255) / (2**256))
+numHashes2 = 1 / ((2**254) / (2**256))
+print(f"Avg. number of hashes with one leading zeroes: {numHashes1}")
+print(f"Avg. number of hashes with two leading zeroes: {numHashes2}")
 print(f"Number of hashes with two leading zeroes is greater than one leading zero is: {numHashes2 / numHashes1} ")
 print("------------------------------------------")
-print("Simpler example: 100 possible values (1-100).")
-target1 = 100 / (25 + 1)
-target2 = 100 / (50 + 1)
-print(f"Target is 25: {target1}")
-print(f"Target is 50: {target2}")
-print(f"Number of hashes with two leading zeroes is greater than one leading zero is: {numHashes2 / numHashes1} ")
+leadingZeroes = 4
+target = 2**(256 - leadingZeroes)
+expectedAvgHashes = 2**256 / (target)
+print(f"Finding a nonce with {leadingZeroes} leading zeroe/s...")
+print(f"i.e., get a value below the target {target}.")
+print(f"Probability of finding valid hash: {target/(2**256)}")
+print(f"Expected avg. of hashes: {expectedAvgHashes}.")
+
+# used to generate a "previous hash"
+def RandomHash():
+    randomBits = random.getrandbits(256)
+    randomHash = sha256(str(randomBits).encode()).hexdigest()
+
+    return int(randomHash, 16)
+
+# Valid PoW: checks if proof (nonce) found hash <= target
+def ValidProof(lastHash, nonce):
+    guessNum = lastHash * nonce
+    guessString = f"{guessNum}".encode()
+    guessHash = sha256(guessString).hexdigest()
+
+    return int(guessHash, 16) <= target
+
+def PoW(lastHash):
+    nonce = 0
+
+    while (ValidProof(lastHash, nonce) is False):
+        nonce += 1
+
+    #print(f"Solved hash: {sha256(f'{lastHash + nonce}'.encode()).hexdigest()}")
+
+    return nonce
+
+
+allHashes = np.zeros(1000, dtype=int)
+
+# simulate one PoW done
+def IndividualHash():
+    prevHash = RandomHash() # generate random hash as input for PoW
+    solvedHash = PoW(prevHash) # solve for proof
+
+    return solvedHash
+
+""""
+:param numProofs: <int> number of proofs to be solved
+:return: <int> Avg. number of hashes to find valid proof
+"""
+def RunNumerousHashes(numProofs):
+    sumHashes = 0
+    for r in range(numProofs):
+        hashes = IndividualHash() # calculate one PoW
+        allHashes[r] = hashes # add num of hashes to solve that proof to list
+        sumHashes += hashes
+    
+    return sumHashes / numProofs
+
+RunNumerousHashes(1000)
+print("BASIC STATS:")
+print(f"Min. hashes: {allHashes.min()}")
+print(f"Max. hashes: {allHashes.max()}")
+print(f"Avg. hashes: {allHashes.mean()}")

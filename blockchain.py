@@ -1,4 +1,5 @@
 import hashlib
+from hashlib import sha256
 import json
 from textwrap import dedent
 from time import time
@@ -6,188 +7,164 @@ from uuid import uuid4
 from flask import Flask, jsonify, request
 from urllib.parse import urlparse
 
-class Blockchain(object):
-    def __init__(self):
-        self.chain = []
-        self.currentTransactions = []
-        self.nodes = set()
-        
-        # create the genesis block
-        self.NewBlock(proof=100, previousHash=1)
-    
-    def NewBlock(self, proof, previousHash=None):
-        """
-        Creates a new block and adds it to the chain
-        :param proof: <int> The proof given by Proof of Work algorithm
-        :param previousHash: (Optional) <str> Hash of previous block
-        :return: <dict> New Block
-        """
-
-        block = {
-            'index': len(self.chain) + 1,
-            'timestamp': time(),
-            'transactions': self.currentTransactions,
-            'proof': proof,
-            'previousHash': previousHash or self.Hash(self.chain[-1])
-        }
-
-        # by this point, block PoW has been done, so the block is validated and secured
-        # reset the current list of transactions
-        self.currentTransactions = []
-
-        self.chain.append(block)
-        return block
-
-
-    def NewTransaction(self, sender, recipient, amount):
-        """
-        Creates a new transaction to go into the next mined BLock
-        :param sender: <str> Address of the sender
-        :param recipient: <str> Address of the recipient
-        :param amount: <int> Amount
-        :return: <int> The index of the Block that will hold this
-        """ 
-
-        self.currentTransactions.append({
-            'sender': sender,
-            'recipient': recipient,
-            'amount': amount,
-        })
-
-        return self.LastBlock['index'] + 1
-    
-    def ProofOfWork(self, lastProof):
-        """
-        Simple PoW algorithm:
-        - Find a number p' such that hash(pp') contains leading 4 zeroes,
-        where p is the previous proof
-        - p is the previous proof
-        - p' is the new proof
-        :param lastProof: <int>
-        :return: <int>
-        """
-
-        proof = 0
-        while self.ValidProof(lastProof, proof) is False:
-            proof += 1
-        
-        return proof
-    
-    def RegisterNode(self, address):
-        """
-        Add a new node to the list of nodes
-        :param address: <str> Address of node, e.g., 'http://192.168.0.5:5000'
-        :return: None
-        """    
-
-        parsedUrl = urlparse(address)
-        self.nodes.add(parsedUrl.netloc)
-    
-    def ValidChain(self, chain):
-        """
-        Determine if a given blockchain is valid
-        :param chain: <list> a blockchain
-        :return: <bool> True if valid, otherwise False
-        """
-        pass        
-    
-    @staticmethod
-    def ValidProof(lastProof, proof):
-        """
-        Validates the proof: Does hash(lastProof, proof) contain 4 leading zeroes?
-        :param lastProof: <int> previous proof
-        :param proof: <int> current proof
-        :return: <bool> True if correct, False if not
-        """
-
-        guess = f'{lastProof}{proof}'.encode()
-        guessHash = hashlib.sha256(guess).hexdigest()
-        return guessHash[:4] == "0000"
-        
+class Block(object):
+    def __init__(self, index, transactions, prevHash, timestamp, nonce, difficulty):
+        ''''
+        :param index: <int> Index of block in the chain.
+        :param transactions: <List> The transactions stored in the block.
+        :param prevHash: <str> SHA256-encrypted hash of previous block in the chain.
+        :param timestamp: <int> Time this block was generated, expressed in seconds since the epoch.
+        :param difficulty: <int> Mining difficulty to generate this block.
+        '''
+        self.index = index
+        self.transactions = transactions
+        self.prevHash = prevHash
+        # used in the mining process
+        self.timestamp = timestamp # time when this block was generated
+        self.nonce = nonce # nonce to solve this block
+        self.difficulty = difficulty # PoW difficulty to generate this block
+        self.hash = Block.Hash(self)
 
     @staticmethod
     def Hash(block):
-        """
-        Creates a SHA-256 hash of a block
-        :param block: <dict> block
-        :return: <str>
-        """
-        # dictionary must be ordered or will have inconsistent hashes
-        blockString = json.dumps(block, sort_keys=True).encode() # encoded string in UTF-8
-        return hashlib.sha256(blockString).hexdigest() # encoded with sha256
+        '''
+        Creates hash for a block using the new block's timestamp and nonce, and previous hash.
+        :param block: <Block>
+        :return: <str> Hash of new block.
+        '''
+        # calculate block's hash using the timestamp, nonce,
+        # and the previous hash
+        encodedString = (f"{block.timestamp} + {block.nonce} + {block.prevHash}").encode('utf-8')
+        
+        return sha256(encodedString).hexdigest()
+
+class Blockchain(object):
+    def __init__(self):
+        '''
+        :attr chain: <List> Valid Blocks.
+        :attr currentTransactions: <List> Current transactions to be stored in next block mined.
+        '''
+        self.chain = []
+        self.currentTransactions = []
+        self.currentDifficulty = 1
+
+        # create genesis block and add to the chain
+        self.AddBlock(nonceProof=100, miningDifficulty=1, prevHash=0)
+    
+    def AddBlock(self, nonceProof, miningDifficulty, prevHash=None):
+        '''
+        Creates a new block and adds it to the chain.
+        :param prevHash: <int> Hash of previous block.
+        :param nonceProof: <int> Nonce found to solve for this block.
+        :param miningDifficulty: <int> Difficulty to produce this block.
+        :return: <Block> The new block added to the chain.
+        '''
+
+        NewBlock = Block(
+            index = len(self.chain),
+            transactions = self.currentTransactions,
+            prevHash = prevHash,
+            timestamp = time(),
+            nonce = nonceProof,
+            difficulty = miningDifficulty
+        )
+
+        # block stored unvalidated transactions
+        # reset current transactions
+        self.currentTransactions = []
+
+        self.chain.append(NewBlock)
+
+        return NewBlock
+
+    def NewTransaction(self, sender, recipient, amount):
+        '''
+        Creates a new transaction to be stored in the next mined block.
+        :param sender: <str> Sender of transaction
+        :param recipient: <str> Recipient of transaction
+        :param amount: <float> Amount being sent
+        :return: <int> Index of the block to store the transaction
+        '''
+
+        transaction = {
+            'sender': sender,
+            'recipient': recipient,
+            'amount': amount
+        }
+
+        self.currentTransactions.append(transaction)
+
+        return self.LastBlock.index + 1
+    
+    def Mine(self):
+        '''
+        Mines for a new block by going through PoW process.
+        Adds mined block to the chain.
+        '''
+
+        # Proof of Work
+        previousHash = int(self.LastBlock.hash, 16) # convert to <int> for PoW calculations 
+        target = 2**(256 - self.currentDifficulty)
+
+        nonceSolution = self.ProofOfWork(previousHash, target)
+
+        # Reward miner for finding proof
+        self.NewTransaction(
+                sender="0", 
+                recipient="Chandy's Computer", 
+                amount=1
+            )
+
+        # Add block to the chain
+        self.AddBlock(nonceSolution, self.currentDifficulty, prevHash=previousHash)
+
+        return
+
+    # Proof of Work
+    def ProofOfWork(self, prevHash, target):
+        '''
+        Proof of Work algorithm to solve for the hash.
+        :param prevHash: <int> Previous hash in the chain.
+        :return: <int> The nonce that solves the proof.
+        '''
+
+        nonce = 0
+
+        while self.ValidProof(prevHash, nonce, target) is False:
+            nonce += 1
+
+        return nonce
+    
+    def GetChain(self):
+        for block in self.chain:
+            print(f"Block {block.index} Transactions: {block.transactions}")
+
+        print(f"Length of Chain: {len(self.chain)}")
+
+    @staticmethod
+    def ValidProof(prevHash, nonce, target):
+        '''
+        Checks to see if a proof is valid (prevHash and nonce generate correct hash).
+        :param prevHash: <int> Previous hash in the chain.
+        :param nonce: <int> Nonce--potential solution to the proof.
+        :param target: <int> Number that the proof must be equal to or less than.
+        :return: True if hash is solved for, False otherwise.
+        '''
+        
+        guessNum = prevHash * nonce
+        guessString = f"{guessNum}".encode()
+        guessHash = sha256(guessString).hexdigest()
+
+        return int(guessHash, 16) <= target
 
     @property
     def LastBlock(self):
-        # returns the last block in the chain
+        # returns last block in the chain
         return self.chain[-1]
-    
-# Instantiate our Node
-app = Flask(__name__)
 
-# Generate globally unique address for this node
-nodeIdentifier = str(uuid4()).replace('-', '')
-
-# Instantiate the Blockchain
+# init a blockchain
 blockchain = Blockchain()
 
-@app.route('/mine', methods=['GET'])
-def Mine():
-    """
-    Calculates PoW
-    Rewards the miner by adding a transaction granting 1 coin
-    Forge the new Block by adding it to the chain
-    """
-    
-    # Run PoW algorithm to get next proof
-    lastBlock = blockchain.LastBlock
-    lastProof = lastBlock['proof']
-    proof = blockchain.ProofOfWork(lastProof)
-
-    # Receive reward for finding the proof
-    # Sender is "0" to signify that this node has mined a new coin
-    blockchain.NewTransaction(
-        sender="0",
-        recipient=nodeIdentifier,
-        amount = 1,
-    )
-
-    # Forge the new Block by adding it to the chain
-    previousHash = blockchain.Hash(lastBlock)
-    block = blockchain.NewBlock(proof, previousHash)
-
-    response = {
-        'message': "New Block Forged",
-        'index': block['index'],
-        'transactions': block['transactions'],
-        'proof': block['proof'],
-        'previous hash': block['previousHash'],
-    }
-    return jsonify(response), 200
-
-
-@app.route('/transactions/new', methods=['POST'])
-def NewTransaction():
-    values = request.get_json()
-
-    # Check that the required fields are in POST'ed data
-    required = ['sender', 'recipient', 'amount']
-    if not all(r in values for r in required):
-        return 'Missing Values', 400
-    
-    # Create a new transaction
-    index = blockchain.NewTransaction(values['sender'], 
-        values['recipient'], values['amount'])
-    
-    response = {'message': f"Transaction will be added to Block {index}"}
-    return jsonify(response), 201
-
-@app.route('/chain', methods=['GET'])
-def FullChain():
-    response = {
-        'chain': blockchain.chain,
-        'length': len(blockchain.chain),
-    }
-    return jsonify(response), 200
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+blockchain.NewTransaction(sender="Audra", recipient="Chandler", amount="69")
+blockchain.Mine()
+blockchain.GetChain()
