@@ -23,38 +23,53 @@ class Block(object):
         self.timestamp = timestamp # time when this block was generated
         self.nonce = nonce # nonce to solve this block
         self.difficulty = difficulty # PoW difficulty to generate this block
-        self.hash = Block.Hash(self)
+        self.hash = Block.Hash(self) # hash of the block
 
     @staticmethod
     def Hash(block):
         '''
         Creates hash for a block using the new block's timestamp and nonce, and previous hash.
-        :param block: <Block>
+        :param block: <Block> The block whose hash will be made
         :return: <str> Hash of new block.
         '''
+
         # calculate block's hash using the timestamp, nonce,
         # and the previous hash
-        encodedString = (f"{block.timestamp} + {block.nonce} + {block.prevHash}").encode('utf-8')
+        encodedString = (f"{str(block.timestamp)} + {str(block.nonce)} + {block.prevHash}").encode('utf-8')
         
         return sha256(encodedString).hexdigest()
+    
+    @staticmethod
+    def GetBlockInfo(block):
+        print("---------------------------")
+        print(f"Block {block.index}:")
+        print(f"Transactions: {block.transactions}")
+        print(f"Prev Hash: {block.prevHash}")
+        print(f"Timestamp: {block.timestamp}")
+        print(f"Nonce: {block.nonce}")
+        print(f"Difficulty: {block.difficulty}")
+        print(f"Hash: {block.hash}")
+        print("---------------------------")
+    
 
 class Blockchain(object):
     def __init__(self):
         '''
-        :attr chain: <List> Valid Blocks.
+        :attr chain: <List> Valid (mined) Blocks.
         :attr currentTransactions: <List> Current transactions to be stored in next block mined.
+        :attr currentDifficulty: <int> Current difficulty of mining a new block on the chain.
         '''
         self.chain = []
         self.currentTransactions = []
-        self.currentDifficulty = 1
+        self.currentDifficulty = 4
 
         # create genesis block and add to the chain
-        self.AddBlock(nonceProof=100, miningDifficulty=1, prevHash=0)
+        self.AddBlock(nonceProof=100, miningDifficulty=1, prevHash="0")
     
     def AddBlock(self, nonceProof, miningDifficulty, prevHash=None):
         '''
         Creates a new block and adds it to the chain.
-        :param prevHash: <int> Hash of previous block.
+        :param prevHash: <str> Hash of previous block.
         :param nonceProof: <int> Nonce found to solve for this block.
         :param miningDifficulty: <int> Difficulty to produce this block.
         :return: <Block> The new block added to the chain.
@@ -103,10 +118,10 @@ class Blockchain(object):
         '''
 
         # Proof of Work
-        previousHash = int(self.LastBlock.hash, 16) # convert to <int> for PoW calculations 
+        prevHash = self.LastBlock.hash
         target = 2**(256 - self.currentDifficulty)
 
-        nonceSolution = self.ProofOfWork(previousHash, target)
+        nonceSolution = self.ProofOfWork(prevHash, target)
 
         # Reward miner for finding proof
         self.NewTransaction(
@@ -116,7 +131,7 @@ class Blockchain(object):
             )
 
         # Add block to the chain
-        self.AddBlock(nonceSolution, self.currentDifficulty, prevHash=previousHash)
+        self.AddBlock(nonceSolution, self.currentDifficulty, prevHash=prevHash)
 
         return
 
@@ -124,7 +139,7 @@ class Blockchain(object):
     def ProofOfWork(self, prevHash, target):
         '''
         Proof of Work algorithm to solve for the hash.
-        :param prevHash: <int> Previous hash in the chain.
+        :param prevHash: <str> Previous hash in the chain.
         :return: <int> The nonce that solves the proof.
         '''
 
@@ -135,27 +150,30 @@ class Blockchain(object):
 
         return nonce
     
-    def GetChain(self):
-        for block in self.chain:
-            print(f"Block {block.index} Transactions: {block.transactions}")
-
-        print(f"Length of Chain: {len(self.chain)}")
-
     @staticmethod
     def ValidProof(prevHash, nonce, target):
         '''
         Checks to see if a proof is valid (prevHash and nonce generate correct hash).
-        :param prevHash: <int> Previous hash in the chain.
+        :param prevHash: <str> Previous hash in the chain.
         :param nonce: <int> Nonce--potential solution to the proof.
         :param target: <int> Number that the proof must be equal to or less than.
         :return: True if hash is solved for, False otherwise.
         '''
         
+        prevHash = int(prevHash, 16) # convert to <int> for PoW calculations 
         guessNum = prevHash * nonce
         guessString = f"{guessNum}".encode()
         guessHash = sha256(guessString).hexdigest()
 
         return int(guessHash, 16) <= target
+    
+    @staticmethod
+    def GetBlockChainInfo(chain):
+        for block in chain.chain:
+            Block.GetBlockInfo(block)
+
+        print(f"Length of Chain: {len(chain.chain)}")
+
 
     @property
     def LastBlock(self):
@@ -167,4 +185,7 @@ blockchain = Blockchain()
 
 blockchain.NewTransaction(sender="Audra", recipient="Chandler", amount="69")
 blockchain.Mine()
-blockchain.GetChain()
+blockchain.NewTransaction(sender="God", recipient="Chandler", amount="0.69")
+blockchain.NewTransaction(sender="Chandler", recipient="Audra", amount="0.69")
+blockchain.Mine()
+Blockchain.GetBlockChainInfo(blockchain)

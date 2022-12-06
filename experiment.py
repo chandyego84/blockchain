@@ -23,15 +23,17 @@ def RandomHash():
     randomBits = random.getrandbits(256)
     randomHash = sha256(str(randomBits).encode()).hexdigest()
 
-    return int(randomHash, 16)
+    #return int(randomHash, 16)
+    return randomHash
 
 # Valid PoW: checks if proof (nonce) found hash <= target
 def ValidProof(lastHash, nonce):
     guessNum = lastHash * nonce
     guessString = f"{guessNum}".encode()
     guessHash = sha256(guessString).hexdigest()
+    guessHashInt = int(guessHash, 16)
 
-    return int(guessHash, 16) <= target
+    return guessHashInt <= target
 
 def PoW(lastHash):
     nonce = 0
