@@ -1,6 +1,7 @@
 # Learning Blockchains by Bulding One
 
 For my edification...  
+Currently in the progress of making a web app for simulating a basic blockchain with transactions, mining, and consensus mechanism.
 
 ## Overview of Blockchains
 According to Investopedia: A blockchain is a digital database or ledger that is distributed among the nodes of a peer-to-peer network. Blocks are closed and linked to previously filled block, forming a new chain of data known as a blockchain. All new information that follows that freshly added block is compiled into a newly formed block that will then also be added to the chain once filled. Different types of information can be stored on a blockchain, but the most common use is as a ledger for transactions.
@@ -30,12 +31,13 @@ For this build:
 - Find a hash h with n (mining difficulty) leading zeroes such that h = pp'
 - p = Hash of previous block in the chain
 - p' = Nonce (solution to the problem)
+
 To mimic the consensus validation more closely, we can adjust the difficulty of mining a block by adjusting the target value. More leading zeroes increases the mining difficulty while having less decreases it. A higher difficulty means more hashing is required for a valid proof of work. See chainwork calculation explained later. This [answer](https://www.quora.com/Why-is-difficulty-measured-in-hash-s-leading-zeroes) gives a good explanation for why leading zeroes is used. Note that in Bitcoin the difficulty is not the number of zeroes required; the difficulty is the minimum ratio between a well-defined maximum value, and the hash you got (when interpreted as a 256-bit unsigned integer).
 
 #### Quick Demonstration on Proof of Work
 experiment.py contains a basic demo of finding a hash in the described proof of work above up to a difficulty of 4 leading zeroes.
-Run `python3 experiment.py`
 
+Run `python3 experiment.py`
 
 ### More Details on SHA256 Encryption
 SHA256 returns a 256-bit number in hexadecimal form. Moreover, it will return a string of 64 characters, each of which is a hexadecimal digit (0-9 and a-f). This is a convenient way to represent the hash, as it can be easily stored and transmitted as a string of characters rather than a raw binary value.  
