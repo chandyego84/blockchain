@@ -23,7 +23,6 @@ class Block(object):
         self.timestamp = timestamp # time when this block was generated
         self.nonce = nonce # nonce to solve this block
         self.difficulty = difficulty # PoW difficulty to generate this block
-        self.hash = Block.Hash(self) # hash of the block
 
     @staticmethod
     def Hash(block):
@@ -45,9 +44,8 @@ class Block(object):
         print(f"Transactions: {block.transactions}")
         print(f"Prev Hash: {block.prevHash}")
         print(f"Timestamp: {block.timestamp}")
-        print(f"Nonce: {block.nonce}")
+        print(f"Proof: {block.nonce}")
         print(f"Difficulty: {block.difficulty}")
-        print(f"Hash: {block.hash}")
         print("---------------------------")
     
 
@@ -60,12 +58,12 @@ class Blockchain(object):
         '''
         self.chain = []
         self.currentTransactions = []
-        self.currentDifficulty = 4
+        self.currentDifficulty = 0
 
         # create genesis block and add to the chain
-        self.AddBlock(nonceProof=100, miningDifficulty=0, prevHash="0")
+        self.AddBlock(nonceProof=100, prevHash="0")
     
-    def AddBlock(self, nonceProof, miningDifficulty, prevHash=None):
+    def AddBlock(self, nonceProof, prevHash=None):
         '''
         Creates a new block and adds it to the chain.
         :param prevHash: <str> Hash of previous block.
@@ -77,10 +75,10 @@ class Blockchain(object):
         NewBlock = Block(
             index = len(self.chain),
             transactions = self.currentTransactions,
-            prevHash = prevHash,
+            prevHash = prevHash or Block.Hash(Blockchain.LastBlock),
             timestamp = time(),
             nonce = nonceProof,
-            difficulty = miningDifficulty
+            difficulty = self.currentDifficulty
         )
 
         # block stored unvalidated transactions
@@ -120,7 +118,7 @@ class Blockchain(object):
         self.currentDifficulty = len(self.chain)
 
         # Proof of Work
-        prevHash = self.LastBlock.hash
+        prevHash = Block.Hash(self.LastBlock)
         difficulty = self.currentDifficulty
         nonceSolution = self.ProofOfWork(prevHash, difficulty)
 
@@ -132,7 +130,7 @@ class Blockchain(object):
             )
 
         # Add block to the chain
-        self.AddBlock(nonceSolution, difficulty, prevHash=prevHash)
+        self.AddBlock(nonceSolution, prevHash=prevHash)
 
         return
 
