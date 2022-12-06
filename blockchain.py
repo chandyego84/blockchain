@@ -33,8 +33,7 @@ class Block(object):
         :return: <str> Hash of new block.
         '''
 
-        # calculate block's hash using the timestamp, nonce,
-        # and the previous hash
+        # calculate block's hash using the timestamp, nonce, and the previous hash
         encodedString = (f"{str(block.timestamp)} + {str(block.nonce)} + {block.prevHash}").encode('utf-8')
         
         return sha256(encodedString).hexdigest()
@@ -64,7 +63,7 @@ class Blockchain(object):
         self.currentDifficulty = 4
 
         # create genesis block and add to the chain
-        self.AddBlock(nonceProof=100, miningDifficulty=1, prevHash="0")
+        self.AddBlock(nonceProof=100, miningDifficulty=0, prevHash="0")
     
     def AddBlock(self, nonceProof, miningDifficulty, prevHash=None):
         '''
@@ -117,11 +116,13 @@ class Blockchain(object):
         Adds mined block to the chain.
         '''
 
+        # let's increase the difficulty proportional to number of blocks on the chain
+        self.currentDifficulty = len(self.chain)
+
         # Proof of Work
         prevHash = self.LastBlock.hash
-        target = 2**(256 - self.currentDifficulty)
-
-        nonceSolution = self.ProofOfWork(prevHash, target)
+        difficulty = self.currentDifficulty
+        nonceSolution = self.ProofOfWork(prevHash, difficulty)
 
         # Reward miner for finding proof
         self.NewTransaction(
@@ -131,12 +132,12 @@ class Blockchain(object):
             )
 
         # Add block to the chain
-        self.AddBlock(nonceSolution, self.currentDifficulty, prevHash=prevHash)
+        self.AddBlock(nonceSolution, difficulty, prevHash=prevHash)
 
         return
 
     # Proof of Work
-    def ProofOfWork(self, prevHash, target):
+    def ProofOfWork(self, prevHash, difficulty):
         '''
         Proof of Work algorithm to solve for the hash.
         :param prevHash: <str> Previous hash in the chain.
@@ -145,27 +146,25 @@ class Blockchain(object):
 
         nonce = 0
 
-        while self.ValidProof(prevHash, nonce, target) is False:
+        while self.ValidProof(prevHash, nonce, difficulty) is False:
             nonce += 1
 
         return nonce
     
     @staticmethod
-    def ValidProof(prevHash, nonce, target):
+    def ValidProof(prevHash, nonce, difficulty):
         '''
         Checks to see if a proof is valid (prevHash and nonce generate correct hash).
         :param prevHash: <str> Previous hash in the chain.
         :param nonce: <int> Nonce--potential solution to the proof.
-        :param target: <int> Number that the proof must be equal to or less than.
+        :param difficulty: <int> Number of zeroes required in target hash.
         :return: True if hash is solved for, False otherwise.
         '''
         
-        prevHash = int(prevHash, 16) # convert to <int> for PoW calculations 
-        guessNum = prevHash * nonce
-        guessString = f"{guessNum}".encode()
+        guessString = f"{prevHash}{nonce}".encode()
         guessHash = sha256(guessString).hexdigest()
 
-        return int(guessHash, 16) <= target
+        return guessHash[:difficulty] == '0' * difficulty
     
     @staticmethod
     def GetBlockChainInfo(chain):

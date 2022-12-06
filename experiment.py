@@ -1,75 +1,73 @@
 from hashlib import sha256
 import random
 import numpy as np
+from time import perf_counter
 
-print("Mining difficulty doubles with each leading zero required. 2^256 possible values.")
- # (1 / probability) gives expected avg. of hashes for each proof
-numHashes1 = 1 / ((2**255) / (2**256))
-numHashes2 = 1 / ((2**254) / (2**256))
-print(f"Avg. number of hashes with one leading zeroes: {numHashes1}")
-print(f"Avg. number of hashes with two leading zeroes: {numHashes2}")
+# Expected avg. of hashes to get proof:
+# 1 / probability
+# binary: 2^n
+# hex: 16^n
+# where n is number of leading zeroes (difficulty)
+numHashes1 = 16**1
+numHashes2 = 16**2
+print(f"When using hexadecimals, avg. number of hashes to solve a proof increases by factor of 16 with each leading zero in the target.")
+print(f"We can calculate the avg. number of hashes using (1/probability) or (16^n) where n is number of leading zeroes.")
+probability1 = (16**63)/(16**64)
+probability2 = (16**62)/(16**64)
+print(f"Probability with one leading zeroes:{probability1}")
+print(f"Probability with two leading zeroes:{probability2}")
+print(f"Avg. number of hashes with one leading zeroes (16^1): {numHashes1}")
+print(f"Avg. number of hashes with two leading zeroes(16^2): {numHashes2}")
+print(f"Avg. number with one leading zeroes using probability method: {1/probability1}")
+print(f"Avg. number with two leading zeroes using probability method: {1/probability2}")
 print(f"Number of hashes with two leading zeroes is greater than one leading zero is: {numHashes2 / numHashes1} ")
 print("------------------------------------------")
-leadingZeroes = 4
-target = 2**(256 - leadingZeroes)
-expectedAvgHashes = 2**256 / (target)
-print(f"Finding a nonce with {leadingZeroes} leading zeroe/s...")
-print(f"i.e., get a value below the target {target}.")
-print(f"Probability of finding valid hash: {target/(2**256)}")
-print(f"Expected avg. of hashes: {expectedAvgHashes}.")
 
 # used to generate a "previous hash"
 def RandomHash():
     randomBits = random.getrandbits(256)
     randomHash = sha256(str(randomBits).encode()).hexdigest()
 
-    #return int(randomHash, 16)
     return randomHash
 
 # Valid PoW: checks if proof (nonce) found hash <= target
-def ValidProof(lastHash, nonce):
-    guessNum = lastHash * nonce
-    guessString = f"{guessNum}".encode()
+def ValidProof(lastHash, nonce, difficulty):
+    guessString = f"{lastHash}{nonce}".encode()
     guessHash = sha256(guessString).hexdigest()
-    guessHashInt = int(guessHash, 16)
 
-    return guessHashInt <= target
+    return guessHash[:difficulty] == '0' * difficulty
 
-def PoW(lastHash):
+def PoW(lastHash, difficulty):
     nonce = 0
 
-    while (ValidProof(lastHash, nonce) is False):
+    timeStart = perf_counter()
+    while (ValidProof(lastHash, nonce, difficulty) is False):
         nonce += 1
+    timeEnd = perf_counter()
 
-    #print(f"Solved hash: {sha256(f'{lastHash + nonce}'.encode()).hexdigest()}")
-
-    return nonce
-
-
-allHashes = np.zeros(1000, dtype=int)
-
-# simulate one PoW done
-def IndividualHash():
-    prevHash = RandomHash() # generate random hash as input for PoW
-    solvedHash = PoW(prevHash) # solve for proof
-
-    return solvedHash
-
-""""
-:param numProofs: <int> number of proofs to be solved
-:return: <int> Avg. number of hashes to find valid proof
-"""
-def RunNumerousHashes(numProofs):
-    sumHashes = 0
-    for r in range(numProofs):
-        hashes = IndividualHash() # calculate one PoW
-        allHashes[r] = hashes # add num of hashes to solve that proof to list
-        sumHashes += hashes
+    hashFound = sha256(f'{lastHash}{nonce}'.encode()).hexdigest()
+    elapsedTime = timeEnd - timeStart
     
-    return sumHashes / numProofs
+    return nonce, hashFound, elapsedTime
 
-RunNumerousHashes(1000)
-print("BASIC STATS:")
-print(f"Min. hashes: {allHashes.min()}")
-print(f"Max. hashes: {allHashes.max()}")
-print(f"Avg. hashes: {allHashes.mean()}")
+if __name__ == '__main__':
+
+    # difficulty of 0 == 0 leading bits
+        # of 1 == 1 leading bit
+    maxDifficulty = 5
+
+    for difficulty in range(maxDifficulty):
+        expectedAvgHashes = 16 ** difficulty
+        print("------------------------------------------")
+        print(f"Difficulty: {difficulty}")
+        print(f"Probability of finding valid hash: {(16**(64-difficulty))/(16**64)}")
+        print(f"Expected avg. of hashes: {expectedAvgHashes}.")
+
+        # generate a fake prev hash
+        prevHash = RandomHash()
+        # solve for current hash
+        hashesCount, hashFound, elapsedTime = PoW(prevHash, difficulty)
+        print(f"Hash Found: {hashFound}")
+        print(f"Number of hashes done: {hashesCount}")
+        print(f"Elapsed Time: {elapsedTime}")
+        print("------------------------------------------")
