@@ -4,6 +4,7 @@ from blockchain import Block, Blockchain
 app = Flask(__name__)
 appChain = Blockchain()
 
+# Home
 @app.route('/')
 def HomePage():
     return render_template('home.html')
@@ -21,6 +22,7 @@ def HomeActionResult():
 
         return render_template("home.html")
 
+# Transactions
 @app.route('/transactions/new')
 def NewTransactionPage():
     print("A new transaction is being made")
@@ -37,18 +39,18 @@ def NewTransaction():
         recipient = requestAction['Recipient']
         amount = requestAction['Amount']
 
+        # add the transaction to the blockchain
         appChain.NewTransaction(sender, recipient, amount)
         transactions = appChain.currentTransactions
 
         return render_template('transactions.html', requestAction=requestAction, transactions=transactions)
 
-
+# Mining
 @app.route('/mine')
 def MinePage():
     print("We are mining.")
     
     return render_template('mining.html')
 
-    
 if __name__ == '__main__':
     app.run(debug=True)

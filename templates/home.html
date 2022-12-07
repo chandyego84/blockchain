@@ -1,84 +1,47 @@
-<style>
-   header {
-    background-color: #7540FF;
-    color: #C0C0C0;
-    font-family: sans-serif;
-    font-size: 30px;
-    text-align: center;
-    padding: 15px;
-    margin-bottom: 25px;
-    border: 5px solid #C0C0C0;
-    border-radius: 5px;
-  }
-  .blockchain-logo {
-    width: 50px;
-    height: 50px;
-    background-color: #7540FF;
-    border: 2px solid #C0C0C0;
-    border-radius: 25px;
-    float: left;
-    margin-right: 15px;
-    text-align: center;
-  }
-  .blockchain-logo span {
-    font-family: sans-serif;
-    font-size: 30px;
-    font-weight: bold;
-  }
-  .blockchain-text {
-    font-family: sans-serif;
-    font-size: 20px;
-    text-align: left;
-  }
-   table {
-      border-collapse: collapse;
-   }
-   th, td {
-      padding: 5px;
-      border: 2px solid blueviolet;
-   }
- </style>
-
 <!doctype html>
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/main.css') }}">
 <html>
+<body>
    <header>
       <div class="blockchain-logo">
         <span>C</span>
       </div>
       <div class="blockchain-text">Welcome to Chandy's Blockchain!</div>
     </header>
-   <body>
-      <b>Version 0.1 is able to:</b>
-      <ul>
-         <li>Create Transactions</li>
-         <li>Mine blocks and add to the blockchain</li>
-      </ul>
-      <b>Future versions will include:</b>
-      <ul>
-         <li>Support for numerous nodes</li>
-         <li>Chain verification of nodes</li>
-         <li>Consensus mechanism</li>
-      </ul>
+   <b>Version 0.1 is able to:</b>
+   <ul>
+      <li>Create Transactions</li>
+      <li>Mine blocks and add to the blockchain</li>
+   </ul>
+   <b>Future versions will include:</b>
+   <ul>
+      <li>Support for numerous nodes</li>
+      <li>Chain verification of nodes</li>
+      <li>Consensus mechanism</li>
+      <li>Verification of transactions</li>
+      <li>Lots of bug fixes</li>
+      <li>???</li>
+   </ul>
 
-      <form method="POST">
-         <table>
-            <thead>
-               <tr>
-                  <th>Command</th>
-                  <th>Description</th>
-               </tr>
-            </thead>
-            <tbody>
-               <tr>
-                  <td><input type="submit" name="New Transaction" value="New Transaction"></td>
-                  <td>Creates a new transaction in the blockchain</td>
-               </tr>
-               <tr>
-               <td><input type="submit" name="Mine" value="Mine"></td>
-                  <td>Starts the mining process to validate transactions and add them to the blockchain</td>
-               </tr>
-            </tbody>
-            </table>
-      </form>
-   </body>
+   <form method="POST">
+      <table>
+         <thead>
+            <tr>
+               <th>Command</th>
+               <th>Description</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr>
+               <td><input type="submit" name="New Transaction" value="New Transaction"></td>
+               <td>Creates a new transaction in the blockchain</td>
+            </tr>
+            <tr>
+            <td><input type="submit" name="Mine" value="Mine"></td>
+               <td>Starts the mining process to validate transactions and add them to the blockchain</td>
+            </tr>
+         </tbody>
+         </table>
+   </form>
+</body>
 </html>
