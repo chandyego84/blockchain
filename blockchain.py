@@ -1,11 +1,5 @@
-import hashlib
 from hashlib import sha256
-import json
-from textwrap import dedent
 from time import time
-from uuid import uuid4
-from flask import Flask, jsonify, request
-from urllib.parse import urlparse
 
 class Block(object):
     def __init__(self, index, transactions, prevHash, timestamp, nonce, difficulty):
@@ -177,6 +171,7 @@ class Blockchain(object):
         # returns last block in the chain
         return self.chain[-1]
 
+'''
 # init a blockchain
 blockchain = Blockchain()
 
@@ -186,3 +181,4 @@ blockchain.NewTransaction(sender="God", recipient="Chandler", amount="0.69")
 blockchain.NewTransaction(sender="Chandler", recipient="Audra", amount="0.69")
 blockchain.Mine()
 Blockchain.GetBlockChainInfo(blockchain)
+'''
