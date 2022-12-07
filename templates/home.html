@@ -1,4 +1,35 @@
 <style>
+   header {
+    background-color: #7540FF;
+    color: #C0C0C0;
+    font-family: sans-serif;
+    font-size: 30px;
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 5px solid #C0C0C0;
+    border-radius: 5px;
+  }
+  .blockchain-logo {
+    width: 50px;
+    height: 50px;
+    background-color: #7540FF;
+    border: 2px solid #C0C0C0;
+    border-radius: 25px;
+    float: left;
+    margin-right: 15px;
+    text-align: center;
+  }
+  .blockchain-logo span {
+    font-family: sans-serif;
+    font-size: 30px;
+    font-weight: bold;
+  }
+  .blockchain-text {
+    font-family: sans-serif;
+    font-size: 20px;
+    text-align: left;
+  }
    table {
       border-collapse: collapse;
    }
@@ -7,11 +38,16 @@
       border: 2px solid blueviolet;
    }
  </style>
- 
+
 <!doctype html>
 <html>
+   <header>
+      <div class="blockchain-logo">
+        <span>C</span>
+      </div>
+      <div class="blockchain-text">Welcome to Chandy's Blockchain!</div>
+    </header>
    <body>
-      <h1>Welcome to Chandy's Blockchain</h1>
       <b>Version 0.1 is able to:</b>
       <ul>
          <li>Create Transactions</li>
@@ -27,22 +63,22 @@
       <form method = "POST">
          <table>
             <thead>
-              <tr>
-                <th>Command</th>
-                <th>Description</th>
-              </tr>
+               <tr>
+                  <th>Command</th>
+                  <th>Description</th>
+               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><input type="submit" name="New Transaction" value="New Transaction"></td>
-                <td>Creates a new transaction in the blockchain</td>
-              </tr>
-              <tr>
+               <tr>
+                  <td><input type="submit" name="New Transaction" value="New Transaction"></td>
+                  <td>Creates a new transaction in the blockchain</td>
+               </tr>
+               <tr>
                <td><input type="submit" name="Mine" value="Mine"></td>
-                <td>Starts the mining process to validate transactions and add them to the blockchain</td>
-              </tr>
+                  <td>Starts the mining process to validate transactions and add them to the blockchain</td>
+               </tr>
             </tbody>
-          </table>
+            </table>
       </form>
    </body>
 </html>
