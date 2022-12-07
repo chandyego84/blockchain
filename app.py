@@ -5,30 +5,46 @@ app = Flask(__name__)
 appChain = Blockchain()
 
 @app.route('/')
-def Home():
+def HomePage():
     return render_template('home.html')
 
 @app.route('/', methods=['GET', 'POST'])
-def ActionResult():
+def HomeActionResult():
     if request.method == 'POST':
         requestAction = request.form
 
         if 'New Transaction' in requestAction:
-            return redirect(url_for('NewTransaction'))
+            return redirect(url_for('NewTransactionPage'))
         
         elif 'Mine' in requestAction:
-            return redirect(url_for('Mine'))
+            return redirect(url_for('MinePage'))
 
         return render_template("home.html")
 
 @app.route('/transactions/new')
-def NewTransaction():
-    print("We are making a transaction")
+def NewTransactionPage():
+    print("A new transaction is being made")
 
     return render_template('newTransaction.html')
 
+@app.route('/transactions', methods=['POST', 'GET'])
+def NewTransaction():
+    if request.method == 'POST':
+        requestAction = request.form
+
+        # get transaction info from the request
+        sender = requestAction['Sender']
+        recipient = requestAction['Recipient']
+        amount = requestAction['Amount']
+
+        appChain.NewTransaction(sender, recipient, amount)
+        transactions = appChain.currentTransactions
+        
+        return render_template('transactions.html', requestAction=requestAction, transactions=transactions)
+
+
 @app.route('/mine')
-def Mine():
+def MinePage():
     print("We are mining.")
 
 

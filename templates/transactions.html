@@ -1,0 +1,37 @@
+<style>
+    table {
+    border-collapse: collapse;
+   }
+   th, td {
+      padding: 5px;
+      border: 2px solid blueviolet;
+   }
+
+</style>
+<!doctype html>
+<html>
+   <body>
+    <b>Your transaction was added to the list of pending transactions!</b>
+    <table border = 1>
+        {% for key, value in requestAction.items() %}
+           <tr>
+              <th> {{ key }} </th>
+              <td> {{ value }} </td>
+           </tr>
+        {% endfor %}
+     </table>
+     <br><br>
+    <b>List of all pending transactions:</b>
+    {% for transaction in transactions %}
+    <table border = 1>
+        {% for key, value in transaction.items() %}
+            <tr>
+                <th>{{ key }}</th>
+                <td> {{ value }} </td>
+            </tr>
+        {% endfor %}
+     </table>
+     <br>
+     {% endfor %}
+   </body>
+</html>
