@@ -39,20 +39,16 @@ def NewTransaction():
 
         appChain.NewTransaction(sender, recipient, amount)
         transactions = appChain.currentTransactions
-        
+
         return render_template('transactions.html', requestAction=requestAction, transactions=transactions)
 
 
 @app.route('/mine')
 def MinePage():
     print("We are mining.")
-
-
+    
     return render_template('mining.html')
 
     
-
-
-        
 if __name__ == '__main__':
     app.run(debug=True)

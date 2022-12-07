@@ -1,7 +1,13 @@
 # Learning Blockchains by Bulding One
 
-For my edification...  
-Currently in the progress of making a web app for simulating a basic blockchain with transactions, mining, and consensus mechanism.
+For my edification...Currently in the process of making a web app for simulating a basic blockchain with transactions, mining, and consensus mechanism.  
+
+### Running the web app
+Currently, the app is not deployed. For now, you can play around with the current working version (0.1) on your local machine.  
+```bash
+git clone https://github.com/chandyego84/blockchain.git
+python3 app.py
+```
 
 ## Overview of Blockchains
 According to Investopedia: A blockchain is a digital database or ledger that is distributed among the nodes of a peer-to-peer network. Blocks are closed and linked to previously filled block, forming a new chain of data known as a blockchain. All new information that follows that freshly added block is compiled into a newly formed block that will then also be added to the chain once filled. Different types of information can be stored on a blockchain, but the most common use is as a ledger for transactions.
