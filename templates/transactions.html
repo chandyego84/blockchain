@@ -1,29 +1,18 @@
-<style>
-    table {
-    border-collapse: collapse;
-   }
-   th, td {
-      padding: 5px;
-      border: 2px solid blueviolet;
-   }
-
-</style>
 <!doctype html>
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/main.css') }}">
 <html>
    <body>
-    <b>Your transaction was added to the list of pending transactions!</b>
-    <table border = 1>
-        {% for key, value in requestAction.items() %}
-           <tr>
-              <th> {{ key }} </th>
-              <td> {{ value }} </td>
-           </tr>
-        {% endfor %}
-     </table>
+      <b>Make a new transaction</b>
+      <form method="POST">
+          <p>Sender <input type="text" name="Sender"/></p>
+          <p>Recipient <input type="text" name="Recipient"/></p>
+          <p>Amount <input type="text" name="Amount"/></p>
+          <p><input type="submit" value="Submit" /></p>
+       </form>  
      <br><br>
-    <b>List of all pending transactions:</b>
+    <b>Pending transactions:</b>
     {% for transaction in transactions %}
-    <table border = 1>
+    <table>
         {% for key, value in transaction.items() %}
             <tr>
                 <th>{{ key }}</th>
