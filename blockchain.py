@@ -1,17 +1,18 @@
 from hashlib import sha256
-from time import time
+import datetime
+import json
 
 class Block(object):
     def __init__(self, index, transactions, prevHash, timestamp, nonce, difficulty):
         ''''
         :param index: <int> Index of block in the chain.
-        :param transactions: <List> The transactions stored in the block.
+        :param transactions: <str> The transactions stored in the block. Input must be <List> of JSONs
         :param prevHash: <str> SHA256-encrypted hash of previous block in the chain.
-        :param timestamp: <int> Time this block was generated, expressed in seconds since the epoch.
+        :param timestamp: <str> Time this block was generated, expressed in 'YYYY-MM-DDTHH:MM:SS.SSSSSS' format
         :param difficulty: <int> Mining difficulty to generate this block.
         '''
         self.index = index
-        self.transactions = transactions
+        self.transactions = json.dumps(transactions)
         self.prevHash = prevHash
         # used in the mining process
         self.timestamp = timestamp # time when this block was generated
@@ -47,7 +48,7 @@ class Blockchain(object):
     def __init__(self):
         '''
         :attr chain: <List> Valid (mined) Blocks.
-        :attr currentTransactions: <List> Current transactions to be stored in next block mined.
+        :attr currentTransactions: <List> Current transactions (json values) to be stored in next block mined.
         :attr currentDifficulty: <int> Current difficulty of mining a new block on the chain.
         '''
         self.chain = []
@@ -62,7 +63,6 @@ class Blockchain(object):
         Creates a new block and adds it to the chain.
         :param prevHash: <str> Hash of previous block.
         :param nonceProof: <int> Nonce found to solve for this block.
-        :param miningDifficulty: <int> Difficulty to produce this block.
         :return: <Block> The new block added to the chain.
         '''
 
@@ -70,7 +70,7 @@ class Blockchain(object):
             index = len(self.chain),
             transactions = self.currentTransactions,
             prevHash = prevHash or Block.Hash(Blockchain.LastBlock),
-            timestamp = time(),
+            timestamp = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'),
             nonce = nonceProof,
             difficulty = self.currentDifficulty
         )
@@ -124,9 +124,9 @@ class Blockchain(object):
             )
 
         # Add block to the chain
-        self.AddBlock(nonceSolution, prevHash=prevHash)
+        newBlock = self.AddBlock(nonceSolution, prevHash=prevHash)
 
-        return
+        return newBlock
 
     # Proof of Work
     def ProofOfWork(self, prevHash, difficulty):
@@ -171,14 +171,3 @@ class Blockchain(object):
         # returns last block in the chain
         return self.chain[-1]
 
-'''
-# init a blockchain
-blockchain = Blockchain()
-
-blockchain.NewTransaction(sender="Audra", recipient="Chandler", amount="69")
-blockchain.Mine()
-blockchain.NewTransaction(sender="God", recipient="Chandler", amount="0.69")
-blockchain.NewTransaction(sender="Chandler", recipient="Audra", amount="0.69")
-blockchain.Mine()
-Blockchain.GetBlockChainInfo(blockchain)
-'''

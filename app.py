@@ -27,7 +27,7 @@ def HomeActionResult():
             return redirect(url_for('Transaction'))
         
         elif 'Mine' in requestAction:
-            return redirect(url_for('MinePage'))
+            return redirect(url_for('MineLoading'))
 
     return render_template("home.html")
 
@@ -36,7 +36,6 @@ def HomeActionResult():
 def Transaction():
     if request.method == 'POST':
         requestAction = request.form
-
         # get transaction info from the request
         sender = requestAction['Sender']
         recipient = requestAction['Recipient']
@@ -69,11 +68,34 @@ def Transaction():
     
 
 # Mining
-@app.route('/mine')
-def MinePage():
-    print("We are mining.")
-    
+@app.route('/mine', methods=['GET'])
+def Mine():
+    '''
+    Performs mining for a block.
+    '''
+    newBlock = appChain.Mine()
+
+    return newBlock
+
+@app.route('/mining', methods=['GET'])
+def MineLoading():
+    '''
+    Loading screen for when mining is happening.
+    '''
     return render_template('mining.html')
+
+@app.route('/mining/completed', methods=['POST', 'GET'])
+def MininingCompleted():
+    '''
+    Show information for mined block when mining is completed.
+    '''
+    if request.method == 'POST':
+        requestAction = request.form
+
+        if 'Mine' in requestAction:
+            return redirect(url_for('MineLoading'))
+
+    return render_template('miningCompleted.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
