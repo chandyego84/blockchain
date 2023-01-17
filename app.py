@@ -1,4 +1,6 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask
+from flask import render_template, redirect, url_for, request
+from flask import jsonify
 from flaskext.mysql import MySQL
 from blockchain import Block, Blockchain
 
@@ -74,8 +76,16 @@ def Mine():
     Performs mining for a block.
     '''
     newBlock = appChain.Mine()
+    jsonBlock = {
+        'index': newBlock.index,
+        'transactions': newBlock.transactions,
+        'previousHash': newBlock.prevHash,
+        'timestamp': newBlock.timestamp,
+        'proof': newBlock.nonce,
+        'difficulty': newBlock.difficulty
+    }
 
-    return newBlock
+    return jsonBlock
 
 @app.route('/mining', methods=['GET'])
 def MineLoading():
@@ -90,12 +100,15 @@ def MininingCompleted():
     Show information for mined block when mining is completed.
     '''
     if request.method == 'POST':
+        # User wants to mine again
         requestAction = request.form
 
         if 'Mine' in requestAction:
             return redirect(url_for('MineLoading'))
-
-    return render_template('miningCompleted.html')
+    
+    else:
+        newBlock = appChain.LastBlock
+        return render_template('miningCompleted.html', newBlock=newBlock)
 
 if __name__ == '__main__':
     app.run(debug=True)

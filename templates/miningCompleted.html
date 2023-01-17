@@ -3,6 +3,28 @@
 <html>
    <body>
       <p>You just mined a block!</p>
+      <table>
+            <tr>
+                <th>Index</th>
+                <td> {{ newBlock.index }} </td>
+            </tr>
+            <tr>
+                <th>Transactions</th>
+                <td> {{ newBlock.transactions }} </td>
+            </tr>
+            <tr>
+                <th>Timestamp</th>
+                <td> {{ newBlock.timestamp }} </td>
+            </tr>
+            <tr>
+                <th>Difficulty</th>
+                <td> {{ newBlock.difficulty }} </td>
+            </tr>
+
+            <tr>
+                <th>Previous Hash</th>
+                <td> {{ newBlock.prevHash }} </td>
+            </tr>
      </table>
       <p>Mine again?</p>
       <form method="POST">
