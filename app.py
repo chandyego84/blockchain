@@ -101,6 +101,7 @@ def Mine():
 def MineLoading():
     #TODO: Show nonces being generate during mining process to show user mining is being done.
     '''
+    Undergoes mining process.
     RENDER:
     Loading screen for when mining is happening.
     '''

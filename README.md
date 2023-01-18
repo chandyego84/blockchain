@@ -1,11 +1,20 @@
 # Learning Blockchains by Bulding One
 
-For my edification...Currently in the process of making a web app for simulating a basic blockchain with transactions, mining, and consensus mechanism.  
+ChatGPT's Warning:
+![GPTWarning](./assets/chatGptWarning.png)
+
+<b>NOTE</b>: This is just a basic *demo*. It uses the MySQL which is NOT decentralized.
+
+Major TODOs:
+- Remove storage of data in database --> purely nodes
+- Wallets
+- Verification of transactions
 
 ### Running the web app
 Currently, the app is not deployed. For now, you can play around with the current working version (0.1) on your local machine.  
 ```bash
 git clone https://github.com/chandyego84/blockchain.git
+source venv/bin/activate
 python3 app.py
 ```
 
@@ -63,3 +72,11 @@ hashes = 2^256 / (target). When a hash is performed, the hash function spits out
 To mine this block on the chain, this hash result must be below the target value for that particular height
 on the chain. Thus, to find how many hashes are needed to be performed (on average) to get below this value, you divide the maximum range of numbers by the number you want to get below. This calculation is actually just derived from the concept of "expected value" in statistics.     
 Using a simlper example, say there a maximum of 50 values (1-50) and the target is 25. To guarantee that a number below 25 is found, there must be at least 25 + 1 = 26 hashes done.
+
+## Nodes
+- Full nodes: These nodes store the entire blockchain and validate all transactions and blocks. They are responsible for enforcing the consensus rules of the network. Full nodes are necessary for the security and integrity of the network, but they require a significant amount of storage space.
+
+- Lightweight nodes (SPV): These nodes do not store the entire blockchain, instead, they rely on full nodes to provide them with the information they need. They only store the block headers and use a simplified payment verification (SPV) to validate transactions. Lightweight nodes are less secure than full nodes, but they require less storage space and are more suitable for resource-constrained devices.
+
+- Archival nodes: These nodes store the entire blockchain, but they do not validate transactions, they only provide data to other nodes in the network. They act as a historical archive of the blockchain.
+
