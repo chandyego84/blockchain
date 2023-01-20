@@ -108,7 +108,7 @@ class Blockchain(object):
         Adds mined block to the chain.
         '''
 
-        # let's increase the difficulty proportional to number of blocks on the chain
+        # increase the difficulty proportional to number of blocks on the chain
         self.currentDifficulty = len(self.chain)
 
         # Proof of Work

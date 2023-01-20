@@ -6,11 +6,17 @@ ChatGPT's Warning:
 <b>NOTE</b>: This is just a basic *demo*. It uses the MySQL which is NOT decentralized.
 
 Major TODOs:
-- Remove storage of data in database --> purely nodes
-- Wallets
+- Remove storage of data in database --> purely Nodes
+- Distribution of blocks in node network
+- Wallets in nodes
 - Verification of transactions
+- Limit supply of "coins"
 
-### Running the web app
+Minor TODOs:
+- Adjusting mining difficulty
+- Change proof of work difficulty to be determined from number of leading zeroes to actual Bitcoin protocol
+
+### Running the protocol
 Currently, the app is not deployed. For now, you can play around with the current working version (0.1) on your local machine.  
 ```bash
 git clone https://github.com/chandyego84/blockchain.git
@@ -66,12 +72,21 @@ Each character in a hexadecimal representation represents 4 bits of information 
 ### [Consensus](https://learnmeabitcoin.com/technical/longest-chain)
 A conflict occurs when one node has a different chain to another node. Resolution is that the longest chain is authoritative. The "longest chain" refers to the blockchain that has taken the most ENERGY to build; this is not necessarily the same as the chain with the most blocks. To calculate chainwork, find how many hashes would be needed to be performed to mine each block in the chain and add them up. Average expected number of hashes for each block depends on what the [TARGET](https://learnmeabitcoin.com/technical/target) was at the time.
 
+#### Expected Avg. of Hashes to Find PoW
+The expected average of hashes to find a valid proof-of-work (PoW) is 1 / probability because it represents the average number of attempts it takes to find a solution. If the probability of finding a solution in one attempt is p, then the probability of finding a solution in n attempts is (1-p)^(n-1) * p. The expected number of attempts is the sum of the probability of finding a solution on the nth attempt multiplied by n, for all possible values of n. This is concept of "expected value" in statistics.
+```
+E[X] = ∑ (n * (1-p)^(n-1) * p)
+Where E[X] is the expected value of the number of attempts, X is the number of attempts, n is the number of attempts, p is the probability of finding a solution on the first attempt and (1-p)^(n-1) is the probability of not finding a solution in the first n-1 attempts
+
+By solving the above equation we get :
+E[X] = 1/p
+``` 
+
 #### Chainwork Calculation
 To calculate the number of hashes to be performed on each block based on the target:
 hashes = 2^256 / (target). When a hash is performed, the hash function spits out a 256-bit number.
 To mine this block on the chain, this hash result must be below the target value for that particular height
-on the chain. Thus, to find how many hashes are needed to be performed (on average) to get below this value, you divide the maximum range of numbers by the number you want to get below. This calculation is actually just derived from the concept of "expected value" in statistics.     
-Using a simlper example, say there a maximum of 50 values (1-50) and the target is 25. To guarantee that a number below 25 is found, there must be at least 25 + 1 = 26 hashes done.
+on the chain. Thus, to find how many hashes are needed to be performed (worst-case) to get below this value, you divide the maximum range of numbers by the number you want to get below.
 
 ## Nodes
 - Full nodes: These nodes store the entire blockchain and validate all transactions and blocks. They are responsible for enforcing the consensus rules of the network. Full nodes are necessary for the security and integrity of the network, but they require a significant amount of storage space.

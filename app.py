@@ -123,6 +123,8 @@ def MininingCompleted():
     else:
         # Render new block mined.
         newBlock = appChain.LastBlock
+
+        
         return render_template('miningCompleted.html', newBlock=newBlock)
 
 if __name__ == '__main__':
