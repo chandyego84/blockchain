@@ -1,4 +1,4 @@
-# Learning Blockchains by Bulding One
+# Learning Blockchains by Building One
 
 ChatGPT's Warning:
 ![GPTWarning](./assets/chatGptWarning.png)
@@ -14,7 +14,12 @@ Major TODOs:
 
 Minor TODOs:
 - Adjusting mining difficulty
+- Using Merkel Tree for faster Block hash computation during mining
 - Change proof of work difficulty to be determined from number of leading zeroes to actual Bitcoin protocol
+
+For Fun:
+- Prove that expected average of hashes to find a valid PoW is 1/probability using expected value in statistics.
+Reference: [Mean or Expected Value and Std Deviation](https://openstax.org/books/statistics/pages/4-2-mean-or-expected-value-and-standard-deviation)
 
 ### Running the protocol
 Currently, the app is not deployed. For now, you can play around with the current working version (0.1) on your local machine.  
@@ -24,7 +29,7 @@ source venv/bin/activate
 python3 app.py
 ```
 
-## Overview of Blockchains
+# Overview of Blockchains
 According to Investopedia: A blockchain is a digital database or ledger that is distributed among the nodes of a peer-to-peer network. Blocks are closed and linked to previously filled block, forming a new chain of data known as a blockchain. All new information that follows that freshly added block is compiled into a newly formed block that will then also be added to the chain once filled. Different types of information can be stored on a blockchain, but the most common use is as a ledger for transactions.
 
 ### Difference Between Database and Blockchain
@@ -33,7 +38,7 @@ Database holds its data in tables, blockchain holds data in blocks that are stru
 ### Transaction Process
 ![TransactionProcess](./assets/transactionProcess.png)
 
-## Building the Blockchain
+# Building the Blockchain
 
 ### Example of a Block
 ![ExampleBlock](./assets/blockExample.png)
@@ -46,7 +51,7 @@ There will be 3 methods:
 Example request for a transaction:
 ![ExampleTransaction](./assets/transactionExample.png)
 
-### Proof of Work
+# Proof of Work
 The algorithm used to verify the transaction and create a new block in the blockchain. Bitcoin uses SHA-256 for hashing.
 For this build:  
 - Find a hash h with n (mining difficulty) leading zeroes such that h = pp'
@@ -69,10 +74,10 @@ Each character in a hexadecimal representation represents 4 bits of information.
 Why does each character represent 4 bits of information?  
 Each character in a hexadecimal representation represents 4 bits of information because there are 16 possible values for each digit (0-9 and a-f), and 16 is equal to 2 to the power of 4 (16 = 2^4). Since each hexadecimal digit can represent 4 bits, it takes two digits to represent 8 bits (a byte), and 64 digits to represent the full 256-bit output of the SHA-256 hash function. Thus, a 64-character hexadecimal number would store 64 hexadecimal digits, which would represent 64 / 2 = 32 bytes of information. Each byte can represent a number from 0 to 255, so a 64-character hexadecimal number could represent a number in the range 0 to 255^32, which is a very large number.
 
-### [Consensus](https://learnmeabitcoin.com/technical/longest-chain)
+# [Consensus](https://learnmeabitcoin.com/technical/longest-chain)
 A conflict occurs when one node has a different chain to another node. Resolution is that the longest chain is authoritative. The "longest chain" refers to the blockchain that has taken the most ENERGY to build; this is not necessarily the same as the chain with the most blocks. To calculate chainwork, find how many hashes would be needed to be performed to mine each block in the chain and add them up. Average expected number of hashes for each block depends on what the [TARGET](https://learnmeabitcoin.com/technical/target) was at the time.
 
-#### Expected Avg. of Hashes to Find PoW
+### Expected Avg. of Hashes to Find PoW
 The expected average of hashes to find a valid proof-of-work (PoW) is 1 / probability because it represents the average number of attempts it takes to find a solution. If the probability of finding a solution in one attempt is p, then the probability of finding a solution in n attempts is (1-p)^(n-1) * p. The expected number of attempts is the sum of the probability of finding a solution on the nth attempt multiplied by n, for all possible values of n. This is concept of "expected value" in statistics.
 ```
 E[X] = ∑ (n * (1-p)^(n-1) * p)
@@ -88,7 +93,8 @@ hashes = 2^256 / (target). When a hash is performed, the hash function spits out
 To mine this block on the chain, this hash result must be below the target value for that particular height
 on the chain. Thus, to find how many hashes are needed to be performed (worst-case) to get below this value, you divide the maximum range of numbers by the number you want to get below.
 
-## Nodes
+# Nodes
+Currently only supporting full nodes.
 - Full nodes: These nodes store the entire blockchain and validate all transactions and blocks. They are responsible for enforcing the consensus rules of the network. Full nodes are necessary for the security and integrity of the network, but they require a significant amount of storage space.
 
 - Lightweight nodes (SPV): These nodes do not store the entire blockchain, instead, they rely on full nodes to provide them with the information they need. They only store the block headers and use a simplified payment verification (SPV) to validate transactions. Lightweight nodes are less secure than full nodes, but they require less storage space and are more suitable for resource-constrained devices.
