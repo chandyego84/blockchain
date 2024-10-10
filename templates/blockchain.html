@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/main.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Blockchain Overview</h1>
+    </header>
+    <table>
+        <thead>
+            <tr>
+                <th>Index</th>
+                <th>Transactions</th>
+                <th>Previous Hash</th>
+                <th>Timestamp</th>
+                <th>Proof</th>
+                <th>Difficulty</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for block in blockchain %}
+            <tr>
+                <td>{{ block.index }}</td>
+                <td>{{ block.transactions }}</td>
+                <td>{{ block.prevHash }}</td>
+                <td>{{ block.timestamp }}</td>
+                <td>{{ block.nonce }}</td>
+                <td>{{ block.difficulty }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('HomeActionResult') }}">Back to Home</a>
+</body>
+</html>

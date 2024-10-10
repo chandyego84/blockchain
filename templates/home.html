@@ -8,7 +8,7 @@
       </div>
       <div class="blockchain-text">Welcome to Chandy's Blockchain!</div>
     </header>
-   <b>Version 0.1 is able to:</b>
+   <b>Currently able to:</b>
    <ul>
       <li>Create Transactions</li>
       <li>Mine blocks and add to the blockchain</li>
@@ -24,7 +24,6 @@
       <li>Lots of bug fixes, exception handling, refactoring code</li>
       <li>???</li>
    </ul>
-   <b>Want to contribute? Create issues/commits on the <a href="https://github.com/chandyego84/blockchain">repo!</a></b>
    <br><br>
    <form method="POST">
       <table>
@@ -43,6 +42,10 @@
             <td><input type="submit" name="Mine" value="Mine"></td>
                <td>Starts the mining process to validate transactions and add them to the blockchain</td>
             </tr>
+            <tr>
+               <td><a href="{{ url_for('ViewBlockchain') }}"><input type="button" value="View Blockchain"></a></td>
+               <td>Displays the current state of the blockchain</td>
+            </tr>   
          </tbody>
          </table>
    </form>
