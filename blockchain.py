@@ -1,6 +1,7 @@
 from hashlib import sha256
 import datetime
 import json
+import ecdsa
 
 class Block(object):
     def __init__(self, index, transactions, prevHash, timestamp, nonce, difficulty):
@@ -171,3 +172,29 @@ class Blockchain(object):
         # returns last block in the chain
         return self.chain[-1]
 
+class Node(object):
+    def __init__(self, address):
+        """
+        Initializes a node with a unique address.
+        :param address: <str> The unique identifier for the node.
+        """
+        self.address = address
+        self.public_key, self.private_key = self.generate_keys()
+
+    def GenerateKeys(self):
+        """
+        Generates an elliptic curve public-private key pair.
+        :return: (public_key, private_key) <tuple> The public and private keys for the node.
+        """
+        private_key = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
+        public_key = private_key.get_verifying_key()
+        return public_key.to_string().hex(), private_key.to_string().hex()
+
+    def ToDict(self):
+        """
+        Returns a dictionary representation of the node, for easier JSON serialization.
+        """
+        return {
+            "address": self.address,
+            "public_key": self.public_key
+        }

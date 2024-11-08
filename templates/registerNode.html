@@ -1,0 +1,27 @@
+<!doctype html>
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/main.css') }}">
+<html>
+<body>
+   <header>
+      <div class="blockchain-logo">
+        <span>C</span>
+      </div>
+      <div class="blockchain-text">Register a New Node</div>
+   </header>
+
+   <h3>Register Node</h3>
+   <form method="POST" action="{{ url_for('RegisterNode') }}">
+      <label for="address">Node Address:</label>
+      <input type="text" id="address" name="address" required>
+      <button type="submit">Register Node</button>
+   </form>
+
+   <!-- Display message after registration attempt -->
+   {% if message %}
+       <p><strong>{{ message }}</strong></p>
+   {% endif %}
+
+   <br>
+   <a href="{{ url_for('HomeActionResult') }}">Back to Home</a>
+</body>
+</html>
